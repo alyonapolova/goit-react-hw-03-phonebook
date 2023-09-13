@@ -3,18 +3,25 @@ import { ContactForm } from './Form/Form';
 import { Filter } from './Form/Filter';
 import { ContactList } from './Form/ContactList';
 import React from 'react';
-import PropTypes from 'prop-types';
-import { FormDiv } from './Form/Form.styled';
+
+import { FormDiv, ContactsDiv } from './Form/Form.styled';
 export class App extends Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: [],
     filter: '',
   };
+
+  componentDidMount() {
+    const allContacts = localStorage.getItem('contacts');
+    if (allContacts && JSON.parse(allContacts)) {
+      this.setState({ contacts: JSON.parse(allContacts) });
+    } else this.setState(this.state.contacts);
+  }
+  componentDidUpdate(_, prevState) {
+    if (prevState.contacts.length !== this.state.contacts.length) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
 
   handleAddContact = newContact => {
     this.setState(prevState => ({
@@ -42,24 +49,16 @@ export class App extends Component {
             contacts={this.state.contacts}
           />
           <h2>Contacts</h2>
-          <Filter value={filter} onChange={this.handleFilterChange} />
-          <ContactList
-            contacts={contacts}
-            filter={filter}
-            handleDelete={this.handleDelete}
-          />
+          <ContactsDiv>
+            <Filter value={filter} onChange={this.handleFilterChange} />
+            <ContactList
+              contacts={contacts}
+              filter={filter}
+              handleDelete={this.handleDelete}
+            />
+          </ContactsDiv>
         </FormDiv>
       </>
     );
   }
 }
-App.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      // id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  filter: PropTypes.string.isRequired,
-};
